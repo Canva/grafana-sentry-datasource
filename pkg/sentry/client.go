@@ -79,6 +79,4 @@ func (a HTTPClient) Do(req *http.Request, rateLimitsRetryOnFailure bool) (*http.
 
 		return resp, nil
 	}
-
-	return a.doer.Do(req)
 }
