@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/grafana/grafana-plugin-sdk-go/build"
-	"github.com/peterhellberg/link"	
+	"github.com/peterhellberg/link"
 )
 
 type SentryClient struct {
@@ -39,9 +39,9 @@ func (sc *SentryClient) FetchWithPagination(path string, out interface{}) (strin
 	fullURL := path
 	if !strings.HasPrefix(path, sc.BaseURL) {
 		fullURL = sc.BaseURL + path
-	}	
+	}
 	req, _ := http.NewRequest(http.MethodGet, fullURL, nil)
-	res, err := sc.sentryHttpClient.Do(req)
+	res, err := sc.sentryHttpClient.Do(req, true)
 	if err != nil {
 		return "", err
 	}
@@ -75,7 +75,7 @@ func (sc *SentryClient) FetchWithPagination(path string, out interface{}) (strin
 
 func (sc *SentryClient) Fetch(path string, out interface{}) error {
 	req, _ := http.NewRequest(http.MethodGet, sc.BaseURL+path, nil)
-	res, err := sc.sentryHttpClient.Do(req)
+	res, err := sc.sentryHttpClient.Do(req, true)
 	if err != nil {
 		return err
 	}
