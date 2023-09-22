@@ -23,7 +23,6 @@ export const SentryIssueSortOptions: Array<SelectableValue<SentryIssueSort>> = [
   { value: 'user', label: 'Users' },
 ];
 export const SentryEventSortOptions: Array<SelectableValue<SentryEventSort>> = [
-  // { value: 'inbox', label: 'Date Added' },
   { value: 'last_seen()', label: 'Last Seen' },
   { value: 'count()', label: 'Count' },
   { value: 'epm()', label: 'Events per minute' },
