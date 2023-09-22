@@ -32,7 +32,7 @@ func UpdateFrameMeta(frame *data.Frame, executedQueryString string, query Sentry
 				Links: []data.DataLink{
 					{
 						Title:       "Open in Sentry",
-						URL:         fmt.Sprintf("https://%s.sentry.io/discover/${__data.fields[\"Project\"]}:${__data.fields[\"ID\"]}/",orgSlug),
+						URL:         fmt.Sprintf("https://%s.sentry.io/discover/${__data.fields[\"Project\"]}:${__data.fields[\"ID\"]}/", orgSlug),
 						TargetBlank: true,
 					},
 				},
