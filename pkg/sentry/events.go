@@ -53,34 +53,34 @@ type GetEventsInput struct {
 	Limit            int64
 }
 
-func (gii *GetEventsInput) ToQuery() string {
-	urlPath := fmt.Sprintf("/api/0/organizations/%s/events/?", gii.OrganizationSlug)
-	if gii.Limit < 1 || gii.Limit > 100 {
-		gii.Limit = 100
+func (gei *GetEventsInput) ToQuery() string {
+	urlPath := fmt.Sprintf("/api/0/organizations/%s/events/?", gei.OrganizationSlug)
+	if gei.Limit < 1 || gei.Limit > 100 {
+		gei.Limit = 100
 	}
 	params := url.Values{}
-	params.Set("query", gii.Query)
-	params.Set("start", gii.From.Format("2006-01-02T15:04:05"))
-	params.Set("end", gii.To.Format("2006-01-02T15:04:05"))
-	if gii.Sort != "" {
-		params.Set("sort", gii.Sort)
+	params.Set("query", gei.Query)
+	params.Set("start", gei.From.Format("2006-01-02T15:04:05"))
+	params.Set("end", gei.To.Format("2006-01-02T15:04:05"))
+	if gei.Sort != "" {
+		params.Set("sort", gei.Sort)
 	}
-	params.Set("per_page", strconv.FormatInt(gii.Limit, 10))
+	params.Set("per_page", strconv.FormatInt(gei.Limit, 10))
 	for _, field := range reqFields {
 		params.Add("field", field)
 	}
-	for _, projectId := range gii.ProjectIds {
+	for _, projectId := range gei.ProjectIds {
 		params.Add("project", projectId)
 	}
-	for _, environment := range gii.Environments {
+	for _, environment := range gei.Environments {
 		params.Add("environment", environment)
 	}
 	return urlPath + params.Encode()
 }
 
-func (sc *SentryClient) GetEvents(gii GetEventsInput) ([]SentryEvent, string, error) {
+func (sc *SentryClient) GetEvents(gei GetEventsInput) ([]SentryEvent, string, error) {
 	var out SentryEvents
-	executedQueryString := gii.ToQuery()
+	executedQueryString := gei.ToQuery()
 	err := sc.Fetch(executedQueryString, &out)
 	return out.Data, sc.BaseURL + executedQueryString, err
 }
