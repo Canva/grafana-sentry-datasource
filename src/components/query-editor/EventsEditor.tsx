@@ -13,11 +13,11 @@ export const EventsEditor = ({ query, onChange, onRunQuery }: EventsEditorProps)
     onChange({ ...query, eventsQuery } as SentryQuery);
   };
   const onEventsSortChange = (eventsSort: SentryEventSort) => {
-    onChange({ ...query, eventsSort: eventsSort || undefined } as SentryQuery);
+    onChange({ ...query, eventsSort } as SentryQuery);
     onRunQuery();
   };
   const onEventsLimitChange = (eventsLimit?: number) => {
-    onChange({ ...query, eventsLimit: eventsLimit || undefined } as SentryQuery);
+    onChange({ ...query, eventsLimit } as SentryQuery);
   };
   return query.queryType === 'events' ? (
     <>
