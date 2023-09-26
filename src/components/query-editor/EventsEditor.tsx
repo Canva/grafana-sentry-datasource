@@ -1,65 +1,76 @@
 import React from 'react';
-import { InlineFormLabel, Input, Select } from '@grafana/ui';
-import { SentryDataSource } from '../../datasource';
+import { Input, QueryField, Select } from '@grafana/ui';
 import { selectors } from '../../selectors';
 import { SentryEventSortOptions } from '../../constants';
-import type { QueryEditorProps } from '@grafana/data';
-import type { SentryConfig, SentryQuery, SentryEventSort } from '../../types';
+import type { SentryEventSort, SentryEventsQuery } from '../../types';
+import { EditorField, EditorFieldGroup, EditorRow } from '@grafana/experimental';
 
-type EventsEditorProps = Pick<QueryEditorProps<SentryDataSource, SentryQuery, SentryConfig>, 'query' | 'onChange' | 'onRunQuery'>;
+interface EventsEditorProps {
+  query: SentryEventsQuery;
+  onChange: (value: SentryEventsQuery) => void;
+  onRunQuery: () => void;
+}
 
 export const EventsEditor = ({ query, onChange, onRunQuery }: EventsEditorProps) => {
   const onEventsQueryChange = (eventsQuery: string) => {
-    onChange({ ...query, eventsQuery } as SentryQuery);
+    onChange({ ...query, eventsQuery });
   };
   const onEventsSortChange = (eventsSort: SentryEventSort) => {
-    onChange({ ...query, eventsSort } as SentryQuery);
+    onChange({ ...query, eventsSort: eventsSort });
     onRunQuery();
   };
   const onEventsLimitChange = (eventsLimit?: number) => {
-    onChange({ ...query, eventsLimit } as SentryQuery);
+    onChange({ ...query, eventsLimit: eventsLimit });
   };
-  return query.queryType === 'events' ? (
+  return (
     <>
-      <div className="gf-form">
-        <InlineFormLabel width={10} className="query-keyword" tooltip={selectors.components.QueryEditor.Events.Query.tooltip}>
-          {selectors.components.QueryEditor.Events.Query.label}
-        </InlineFormLabel>
-        <Input
-          value={query.eventsQuery}
-          onChange={(e) => onEventsQueryChange(e.currentTarget.value)}
-          onBlur={onRunQuery}
-          placeholder={selectors.components.QueryEditor.Events.Query.placeholder}
-        />
-      </div>
-      <div className="gf-form">
-        <InlineFormLabel width={10} className="query-keyword" tooltip={selectors.components.QueryEditor.Events.Sort.tooltip}>
-          {selectors.components.QueryEditor.Events.Sort.label}
-        </InlineFormLabel>
-        <Select
-          options={SentryEventSortOptions}
-          value={query.eventsSort}
-          width={28}
-          onChange={(e) => onEventsSortChange(e?.value!)}
-          className="inline-element"
-          placeholder={selectors.components.QueryEditor.Events.Sort.placeholder}
-          isClearable={true}
-        />
-        <InlineFormLabel width={8} className="query-keyword" tooltip={selectors.components.QueryEditor.Events.Limit.tooltip}>
-          {selectors.components.QueryEditor.Events.Limit.label}
-        </InlineFormLabel>
-        <Input
-          value={query.eventsLimit}
-          type="number"
-          onChange={(e) => onEventsLimitChange(e.currentTarget.valueAsNumber)}
-          onBlur={onRunQuery}
-          width={32}
-          className="inline-element"
-          placeholder={selectors.components.QueryEditor.Events.Limit.placeholder}
-        />
-      </div>
+      <EditorRow>
+        <EditorField
+          tooltip={selectors.components.QueryEditor.Events.Query.tooltip}
+          label={selectors.components.QueryEditor.Events.Query.label}
+          width={'100%'}
+        >
+          <QueryField
+            query={query.eventsQuery}
+            onChange={(val) => onEventsQueryChange(val)}
+            onRunQuery={onRunQuery}
+            placeholder={selectors.components.QueryEditor.Events.Query.placeholder}
+            portalOrigin="Sentry"
+          />
+        </EditorField>
+      </EditorRow>
+      <EditorRow>
+        <EditorFieldGroup>
+          <EditorField
+            tooltip={selectors.components.QueryEditor.Events.Sort.tooltip}
+            label={selectors.components.QueryEditor.Events.Sort.label}
+          >
+            <Select
+              options={SentryEventSortOptions}
+              value={query.eventsSort}
+              width={28}
+              onChange={(e) => onEventsSortChange(e?.value!)}
+              className="inline-element"
+              placeholder={selectors.components.QueryEditor.Events.Sort.placeholder}
+              isClearable={true}
+            />
+          </EditorField>
+          <EditorField
+            tooltip={selectors.components.QueryEditor.Events.Limit.tooltip}
+            label={selectors.components.QueryEditor.Events.Limit.label}
+          >
+            <Input
+              value={query.eventsLimit}
+              type="number"
+              onChange={(e) => onEventsLimitChange(e.currentTarget.valueAsNumber)}
+              onBlur={onRunQuery}
+              width={32}
+              className="inline-element"
+              placeholder={selectors.components.QueryEditor.Events.Limit.placeholder}
+            />
+          </EditorField>
+        </EditorFieldGroup>
+      </EditorRow>
     </>
-  ) : (
-    <></>
   );
 };
