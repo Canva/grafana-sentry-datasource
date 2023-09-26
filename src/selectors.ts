@@ -71,8 +71,8 @@ export const Components = {
     Events: {
       Query: {
         label: 'Query',
-        tooltip: 'Sentry query to filter the results, details https://docs.sentry.io/product/sentry-basics/search/',
-        placeholder: 'is:unresolved',
+        tooltip: 'Sentry query to filter the results',
+        placeholder: 'Enter a Sentry query (run with Shift+Enter)',
       },
       Sort: {
         label: 'Sort By',

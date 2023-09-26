@@ -29,7 +29,7 @@ export const SentryQueryEditor = (props: SentryQueryEditorProps) => {
       {query.queryType === 'statsV2' ? (
         <StatsV2Editor query={query} onChange={onChange} onRunQuery={onRunQuery} />
       ) : null}
-      {query.queryType === 'events' ? <EventsEditor {...props} /> : null}
+      {query.queryType === 'events' ? <EventsEditor query={query} onChange={onChange} onRunQuery={onRunQuery} /> : null}
     </EditorRows>
   );
 };
