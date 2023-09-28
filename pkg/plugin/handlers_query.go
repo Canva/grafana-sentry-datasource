@@ -49,7 +49,7 @@ func (ds *SentryDatasource) QueryData(ctx context.Context, req *backend.QueryDat
 
 // Convert project slugs to project IDs (if there are any)
 func ConvertProjectSlugsToIDs(ctx context.Context, client sentry.SentryClient, query *SentryQuery) {
-	slugsToReplace := make([]string, 0)
+	slugsToReplace := make([]string, 0, len(query.ProjectIds))
 
 	for _, idOrSlug := range query.ProjectIds {
 		if _, err := strconv.Atoi(idOrSlug); err != nil {
