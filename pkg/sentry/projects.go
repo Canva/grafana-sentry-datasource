@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+const projectCacheKey = "projects"
+
 type SentryProject struct {
 	DateCreated  time.Time `json:"dateCreated"`
 	HasAccess    bool      `json:"hasAccess"`
@@ -26,29 +28,46 @@ type SentryProject struct {
 	} `json:"teams"`
 }
 
-func (sc *SentryClient) GetProjects(organizationSlug string, withPagination bool) ([]SentryProject, error) {
+func (sc *SentryClient) GetProjects(organizationSlug string, withPagination bool, bypassCache bool) ([]SentryProject, error) {
+	if !bypassCache {
+		cacheKey := projectCacheKey
+		if withPagination {
+			cacheKey += "-pagination"
+		}
+		cacheValue, found := sc.cache.Get(cacheKey)
+		if found {
+			projects, ok := cacheValue.([]SentryProject)
+			if ok {
+				return projects, nil
+			}
+		}
+	}
+
 	projects := []SentryProject{}
 	if organizationSlug == "" {
 		organizationSlug = sc.OrgSlug
-	}	
+	}
 	url := "/api/0/organizations/" + organizationSlug + "/projects/"
-	
-	if (withPagination) {
-		for (url != "") {
+
+	if withPagination {
+		for url != "" {
 			batch := []SentryProject{}
 			nextURL, err := sc.FetchWithPagination(url, &batch)
 			if err != nil {
 				return nil, err
 			}
-	
+
 			projects = append(projects, batch...)
 			url = nextURL
 		}
-		return projects, nil
 	} else {
 		err := sc.Fetch(url, &projects)
-		return projects, err		
+		if err != nil {
+			return nil, err
+		}
 	}
+	sc.cache.Set(projectCacheKey, projects, defaultCacheTTL)
+	return projects, nil
 }
 
 func (sc *SentryClient) GetTeamsProjects(organizationSlug string, teamSlug string) ([]SentryProject, error) {
