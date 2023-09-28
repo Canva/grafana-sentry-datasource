@@ -16,6 +16,7 @@ type SentryClient struct {
 	OrgSlug          string
 	authToken        string
 	sentryHttpClient HTTPClient
+	cache            *Cache
 }
 
 func NewSentryClient(baseURL string, orgSlug string, authToken string, doerClient doer) (*SentryClient, error) {
@@ -23,6 +24,7 @@ func NewSentryClient(baseURL string, orgSlug string, authToken string, doerClien
 		BaseURL:   DefaultSentryURL,
 		OrgSlug:   orgSlug,
 		authToken: authToken,
+		cache:     NewCache(),
 	}
 	if baseURL != "" {
 		client.BaseURL = baseURL

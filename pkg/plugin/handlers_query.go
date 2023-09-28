@@ -3,6 +3,7 @@ package plugin
 import (
 	"context"
 	"encoding/json"
+	"strconv"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/data/framestruct"
@@ -46,12 +47,39 @@ func (ds *SentryDatasource) QueryData(ctx context.Context, req *backend.QueryDat
 	return response, nil
 }
 
+// Convert project slugs to project IDs (if there are any)
+func ConvertProjectSlugsToIDs(ctx context.Context, client sentry.SentryClient, query *SentryQuery) {
+	slugsToReplace := make([]string, 0)
+
+	for _, idOrSlug := range query.ProjectIds {
+		if _, err := strconv.Atoi(idOrSlug); err != nil {
+			slugsToReplace = append(slugsToReplace, idOrSlug)
+		}
+	}
+
+	if len(slugsToReplace) > 0 {
+		slugToIDMap := make(map[string]string)
+		projects, err := client.GetProjects(client.OrgSlug, true, false)
+		if err == nil {
+			for _, project := range projects {
+				slugToIDMap[project.Slug] = project.ID
+			}
+			for i, idOrSlug := range query.ProjectIds {
+				if projectID, ok := slugToIDMap[idOrSlug]; ok {
+					query.ProjectIds[i] = projectID
+				}
+			}
+		}
+	}
+}
+
 func QueryData(ctx context.Context, pCtx backend.PluginContext, backendQuery backend.DataQuery, client sentry.SentryClient) backend.DataResponse {
 	response := backend.DataResponse{}
 	query, err := GetQuery(backendQuery)
 	if err != nil {
 		return GetErrorResponse(response, "", err)
 	}
+	ConvertProjectSlugsToIDs(ctx, client, &query)
 	switch query.QueryType {
 	case "issues":
 		if client.OrgSlug == "" {
