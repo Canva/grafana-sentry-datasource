@@ -9,27 +9,27 @@ const (
 	defaultCacheTTL = 5 * time.Minute
 )
 
-type Cache[T comparable] struct {
+type Cache struct {
 	mu         sync.Mutex
-	data       map[string]T
+	data       map[string]interface{}
 	expiration map[string]time.Time
 }
 
-func NewCache[T comparable]() *Cache {
+func NewCache() *Cache {
 	return &Cache{
-		data:       make(map[string]T),
+		data:       make(map[string]interface{}),
 		expiration: make(map[string]time.Time),
 	}
 }
 
-func (c *Cache) Set[T comparable](key string, value T, ttl time.Duration) {
+func (c *Cache) Set(key string, value interface{}, ttl time.Duration) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.data[key] = value
 	c.expiration[key] = time.Now().Add(ttl)
 }
 
-func (c *Cache) Get[T comparable](key string) (T, bool) {
+func (c *Cache) Get(key string) (interface{}, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	value, found := c.data[key]
