@@ -16,7 +16,6 @@ var reqFields = [...]string{
 	"count()",
 	"epm()",
 	"last_seen()",
-	"failure_rate()",
 	"level",
 	"event.type",
 	"platform",
@@ -36,7 +35,6 @@ type SentryEvent struct {
 	Count           int64     `json:"count()"`
 	EventsPerMinute float64   `json:"epm()"`
 	LastSeen        time.Time `json:"last_seen()"`
-	FailureRate     float64   `json:"failure_rate()"`
 	Level           string    `json:"level"`
 	EventType       string    `json:"event.type"`
 	Platform        string    `json:"platform"`
