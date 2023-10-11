@@ -19,7 +19,7 @@ type SentryQuery struct {
 	IssuesLimit   int64    `json:"issuesLimit,omitempty"`
 	EventsQuery   string   `json:"eventsQuery,omitempty"`
 	EventsSort    string   `json:"eventsSort,omitempty"`
-	EventsLimit   int64    `json:"eventsLimit,omitempty"`
+	EventsLimit   int64    `json:"eventsLimit,omitempty"`	
 	StatsCategory []string `json:"statsCategory,omitempty"`
 	StatsFields   []string `json:"statsFields,omitempty"`
 	StatsGroupBy  []string `json:"statsGroupBy,omitempty"`
@@ -126,7 +126,7 @@ func QueryData(ctx context.Context, pCtx backend.PluginContext, backendQuery bac
 			return GetErrorResponse(response, executedQueryString, err)
 		}
 		frame = UpdateFrameMeta(frame, executedQueryString, query, client.BaseURL, client.OrgSlug)
-		response.Frames = append(response.Frames, frame)
+		response.Frames = append(response.Frames, frame)	
 	case "statsV2":
 		if client.OrgSlug == "" {
 			return GetErrorResponse(response, "", ErrorInvalidOrganizationSlug)

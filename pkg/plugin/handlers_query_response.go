@@ -37,7 +37,7 @@ func UpdateFrameMeta(frame *data.Frame, executedQueryString string, query Sentry
 					},
 				},
 			}
-		}
+		}	
 	}
 	return frame
 }
