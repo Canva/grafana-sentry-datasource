@@ -84,7 +84,7 @@ export const Components = {
         tooltip: 'Number of results (100 max)',
         placeholder: '100',
       },
-    },
+    },    
     StatsV2: {
       Field: {
         label: 'Field',
