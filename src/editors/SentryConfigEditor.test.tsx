@@ -28,7 +28,7 @@ describe('SentryConfigEditor', () => {
       )
     ).not.toBeInTheDocument();
   });
-  it('render existing datasource without error', async () => {
+  it('render existing datasource without error', () => {
     const options = {
       jsonData: { url: 'https://foo.com', orgSlug: 'my-org-slug' },
       secureJsonFields: { authToken: true } as any,
@@ -57,7 +57,7 @@ describe('SentryConfigEditor', () => {
       )
     ).toBeInTheDocument();
     expect(onOptionsChange).toBeCalledTimes(0);
-    await userEvent.click(
+    userEvent.click(
       within(result.getByTestId('sentry-config-editor-auth-token')).getByText(
         selectors.components.ConfigEditor.SentrySettings.AuthToken.Reset.label
       )
