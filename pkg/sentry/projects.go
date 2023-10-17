@@ -46,7 +46,8 @@ func (sc *SentryClient) GetProjects(organizationSlug string, withPagination bool
 	projects := []SentryProject{}
 	if organizationSlug == "" {
 		organizationSlug = sc.OrgSlug
-	}
+	}	
+
 	url := "/api/0/organizations/" + organizationSlug + "/projects/"
 
 	if withPagination {
