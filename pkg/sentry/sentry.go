@@ -46,7 +46,7 @@ func (sc *SentryClient) FetchWithPagination(path string, out interface{}) (strin
 	if err != nil {
 		return "", err
 	}
-	res, err := sc.sentryHttpClient.Do(req)
+	res, err := sc.sentryHttpClient.Do(req, true)
 	if err != nil {
 		return "", err
 	}
@@ -83,7 +83,7 @@ func (sc *SentryClient) Fetch(path string, out interface{}) error {
 	if err != nil {
 		return err
 	}
-	res, err := sc.sentryHttpClient.Do(req)
+	res, err := sc.sentryHttpClient.Do(req, true)
 	if err != nil {
 		return err
 	}
