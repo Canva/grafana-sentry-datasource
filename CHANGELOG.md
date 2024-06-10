@@ -1,5 +1,34 @@
 # Changelog
 
+## 1.8.0 (2024-05-30)
+
+- Add support for Metrics queries (with thanks again to @oblador) ([#254](https://github.com/grafana/sentry-datasource/pull/254))
+- Dependency updates
+
+## 1.7.0 (2024-05-07)
+
+- Add support for Events Stats queries (with thanks to @oblador) ([#225](https://github.com/grafana/sentry-datasource/pull/225))
+- Minor update to tooltip text when entering an organization slug
+- Dependency updates
+
+## 1.6.0 (2024-03-22)
+
+- Dependency updates
+  
+## 1.5.0 (2023-12-11)
+
+- Add interval to statsV2
+- Bump github.com/grafana/grafana-plugin-sdk-go from 0.179.0 to 0.196.0
+- Add getRequiredFields function
+- Other dependency updates
+
+## 1.4.0 (2023-11-15)
+
+- Security and dependencies updates
+- Support for Sentry Events ([#100](https://github.com/grafana/sentry-datasource/pull/100))
+- Support for pagination ([#77](https://github.com/grafana/sentry-datasource/pull/77))
+- Updates to Editors
+
 ## 1.3.0 (2023-08-29)
 
 - Add support for the secure socks proxy
