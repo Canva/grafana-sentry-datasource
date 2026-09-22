@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/grafana/grafana-plugin-sdk-go/build"
+	"github.com/grafana/grafana-plugin-sdk-go/build/buildinfo"
 	"github.com/grafana/sentry-datasource/pkg/mocker"
 )
 
@@ -27,7 +27,7 @@ type HTTPClient struct {
 }
 
 // NewHTTPClient creates a new AuthHTTP client
-func NewHTTPClient(d doer, pluginId string, b build.InfoGetterFunc, authToken string) HTTPClient {
+func NewHTTPClient(d doer, pluginId string, b buildinfo.GetterFunc, authToken string) HTTPClient {
 	info, err := b()
 	version := info.Version
 	if err != nil {

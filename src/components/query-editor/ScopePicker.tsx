@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import type { QueryEditorProps, SelectableValue } from '@grafana/data';
+import { EditorField, EditorFieldGroup, EditorRow } from '@grafana/plugin-ui';
 import { getTemplateSrv } from '@grafana/runtime';
 import { MultiSelect } from '@grafana/ui';
-import { SentryDataSource } from './../../datasource';
-import { getEnvironmentNamesFromProject } from './../../app/utils';
+import React, { useEffect, useMemo, useState } from 'react';
 import { replaceProjectIDs } from './../../app/replace';
+import { getEnvironmentNamesFromProject } from './../../app/utils';
+import { SentryDataSource } from './../../datasource';
 import { selectors } from './../../selectors';
-import type { QueryEditorProps, SelectableValue } from '@grafana/data';
 import type { SentryConfig, SentryProject, SentryQuery } from './../../types';
-import { EditorField, EditorFieldGroup, EditorRow } from '@grafana/experimental';
 
 type ScopePickerProps = { hideEnvironments?: boolean } & Pick<
   QueryEditorProps<SentryDataSource, SentryQuery, SentryConfig>,
@@ -19,17 +19,18 @@ export const ScopePicker = (props: ScopePickerProps) => {
   const { projectIds } = query;
   const environments = query.queryType === 'statsV2' ? [] : query.environments;
   const [projects, setProjects] = useState<SentryProject[]>([]);
-  const [allEnvironments, setAllEnvironments] = useState<string[]>([]);
   const orgSlug = datasource.getOrgSlug();
+  const allEnvironments = useMemo(() => {
+    const updatedProjectIDs = replaceProjectIDs(projectIds);
+
+    return getEnvironmentNamesFromProject(projects, updatedProjectIDs);
+  }, [projects, projectIds]);
+
   useEffect(() => {
     if (orgSlug) {
       datasource.getProjects(orgSlug).then(setProjects).catch(console.error);
     }
   }, [datasource, orgSlug]);
-  useEffect(() => {
-    const updatedProjectIDs = replaceProjectIDs(projectIds);
-    setAllEnvironments(getEnvironmentNamesFromProject(projects, updatedProjectIDs));
-  }, [projects, projectIds]);
   const getProjectsAsOptions = (): Array<SelectableValue<string>> => {
     return [
       ...projects.map((o) => {

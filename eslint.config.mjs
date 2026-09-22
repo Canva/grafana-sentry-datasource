@@ -1,0 +1,20 @@
+import { defineConfig } from 'eslint/config';
+import baseConfig from './.config/eslint.config.mjs';
+
+export default defineConfig([
+  {
+    ignores: [
+      '**/node_modules/',
+      '**/dist/',
+      '**/coverage/',
+      'coverage/**/*',
+      '**/dev/',
+      'test-results/',
+      'playwright-report/',
+      'blob-report/',
+      'playwright/.cache/',
+      'playwright/.auth/',
+    ],
+  },
+  ...baseConfig,
+]);
