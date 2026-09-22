@@ -3,6 +3,7 @@ package plugin
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/httpclient"
@@ -111,6 +112,7 @@ func createResponse(backendQuery backend.DataQuery, client sentry.SentryClient) 
 	if err != nil {
 		return errors.GetErrorResponse(response, "", err)
 	}
+	convertProjectSlugsToIDs(client, &query)
 
 	switch query.QueryType {
 	case "issues":
@@ -135,9 +137,39 @@ func createResponse(backendQuery backend.DataQuery, client sentry.SentryClient) 
 	return response
 }
 
+// convertProjectSlugsToIDs preserves support for dashboards that store Sentry
+// project slugs instead of numeric project IDs.
+func convertProjectSlugsToIDs(client sentry.SentryClient, query *query.SentryQuery) {
+	hasSlug := false
+	for _, idOrSlug := range query.ProjectIds {
+		if _, err := strconv.Atoi(idOrSlug); err != nil {
+			hasSlug = true
+			break
+		}
+	}
+	if !hasSlug {
+		return
+	}
+
+	projects, err := client.GetProjects(client.OrgSlug, true, false)
+	if err != nil {
+		return
+	}
+
+	slugToID := make(map[string]string, len(projects))
+	for _, project := range projects {
+		slugToID[project.Slug] = project.ID
+	}
+	for i, idOrSlug := range query.ProjectIds {
+		if projectID, ok := slugToID[idOrSlug]; ok {
+			query.ProjectIds[i] = projectID
+		}
+	}
+}
+
 // CheckHealth is a callback that is called when Grafana requests a health check for the datasource during setup.
 func (ds *SentryDatasource) CheckHealth(ctx context.Context, req *backend.CheckHealthRequest) (*backend.CheckHealthResult, error) {
-	projects, err := ds.client.GetProjects(ds.client.OrgSlug, false)
+	projects, err := ds.client.GetProjects(ds.client.OrgSlug, false, true)
 	if err != nil {
 		errorMessage := err.Error()
 		return &backend.CheckHealthResult{

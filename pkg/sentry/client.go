@@ -53,7 +53,11 @@ func (a HTTPClient) Do(req *http.Request, rateLimitsRetryOnFailure bool) (*http.
 			return nil, err
 		}
 
-		if resp.StatusCode == http.StatusTooManyRequests && rateLimitsRetryOnFailure && retryCount < maxRetryAttempts {
+		if resp == nil || resp.StatusCode != http.StatusTooManyRequests || !rateLimitsRetryOnFailure || retryCount >= maxRetryAttempts {
+			return resp, nil
+		}
+
+		if resp.StatusCode == http.StatusTooManyRequests {
 			// Check for "X-Sentry-Rate-Limit-Reset" header
 			resetTimeStr := resp.Header.Get("X-Sentry-Rate-Limit-Reset")
 			if resetTimeStr != "" {
@@ -73,7 +77,5 @@ func (a HTTPClient) Do(req *http.Request, rateLimitsRetryOnFailure bool) (*http.
 			retryCount++
 			continue
 		}
-
-		return resp, nil
 	}
 }

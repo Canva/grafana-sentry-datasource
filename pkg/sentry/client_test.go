@@ -22,7 +22,7 @@ func TestHttpClient(t *testing.T) {
 		c := sentry.NewHTTPClient(client, pluginId, stubBuildInfoProvider, authToken)
 		req, err := http.NewRequest(http.MethodGet, dummyPath, nil)
 		require.Nil(t, err)
-		_, _ = c.Do(req)
+		_, _ = c.Do(req, true)
 		require.Equal(t, "Bearer "+authToken, client.req.Header.Get("Authorization"))
 	})
 
@@ -31,7 +31,7 @@ func TestHttpClient(t *testing.T) {
 		c := sentry.NewHTTPClient(client, pluginId, stubBuildInfoProvider, authToken)
 		req, err := http.NewRequest(http.MethodGet, dummyPath, nil)
 		require.Nil(t, err)
-		_, _ = c.Do(req)
+		_, _ = c.Do(req, true)
 		require.Equal(t, fmt.Sprintf("%s/%s", pluginId, dummyVersion), client.req.UserAgent())
 	})
 
@@ -43,7 +43,7 @@ func TestHttpClient(t *testing.T) {
 		c := sentry.NewHTTPClient(client, pluginId, provider, authToken)
 		req, err := http.NewRequest(http.MethodGet, dummyPath, nil)
 		require.Nil(t, err)
-		_, _ = c.Do(req)
+		_, _ = c.Do(req, true)
 		require.Equal(t, fmt.Sprintf("%s/%s", pluginId, "unknown-version"), client.req.UserAgent())
 	})
 }
