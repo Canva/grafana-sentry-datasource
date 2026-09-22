@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/grafana/grafana-plugin-sdk-go/build"
+	"github.com/grafana/grafana-plugin-sdk-go/build/buildinfo"
 	"github.com/grafana/sentry-datasource/pkg/sentry"
 	"github.com/stretchr/testify/require"
 )
@@ -22,7 +22,7 @@ func TestHttpClient(t *testing.T) {
 		c := sentry.NewHTTPClient(client, pluginId, stubBuildInfoProvider, authToken)
 		req, err := http.NewRequest(http.MethodGet, dummyPath, nil)
 		require.Nil(t, err)
-		_, _ = c.Do(req)
+		_, _ = c.Do(req, true)
 		require.Equal(t, "Bearer "+authToken, client.req.Header.Get("Authorization"))
 	})
 
@@ -31,25 +31,25 @@ func TestHttpClient(t *testing.T) {
 		c := sentry.NewHTTPClient(client, pluginId, stubBuildInfoProvider, authToken)
 		req, err := http.NewRequest(http.MethodGet, dummyPath, nil)
 		require.Nil(t, err)
-		_, _ = c.Do(req)
+		_, _ = c.Do(req, true)
 		require.Equal(t, fmt.Sprintf("%s/%s", pluginId, dummyVersion), client.req.UserAgent())
 	})
 
 	t.Run("it sets the version to 'unknown' when the buildInfoProvider returns an error", func(t *testing.T) {
-		provider := func() (build.Info, error) {
-			return build.Info{}, errors.New("500 Internal server error")
+		provider := func() (buildinfo.Info, error) {
+			return buildinfo.Info{}, errors.New("500 Internal server error")
 		}
 		client := &fakeHttpClient{}
 		c := sentry.NewHTTPClient(client, pluginId, provider, authToken)
 		req, err := http.NewRequest(http.MethodGet, dummyPath, nil)
 		require.Nil(t, err)
-		_, _ = c.Do(req)
+		_, _ = c.Do(req, true)
 		require.Equal(t, fmt.Sprintf("%s/%s", pluginId, "unknown-version"), client.req.UserAgent())
 	})
 }
 
-func stubBuildInfoProvider() (build.Info, error) {
-	return build.Info{
+func stubBuildInfoProvider() (buildinfo.Info, error) {
+	return buildinfo.Info{
 		Version: dummyVersion,
 	}, nil
 }

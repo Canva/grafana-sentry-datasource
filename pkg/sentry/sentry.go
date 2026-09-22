@@ -5,9 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 
-	"github.com/grafana/grafana-plugin-sdk-go/build"
+	"github.com/grafana/grafana-plugin-sdk-go/backend"
+	"github.com/grafana/grafana-plugin-sdk-go/build/buildinfo"
 	"github.com/peterhellberg/link"
 )
 
@@ -29,12 +31,25 @@ func NewSentryClient(baseURL string, orgSlug string, authToken string, doerClien
 	if baseURL != "" {
 		client.BaseURL = baseURL
 	}
-	client.sentryHttpClient = NewHTTPClient(doerClient, PluginID, build.GetBuildInfo, client.authToken)
+	client.sentryHttpClient = NewHTTPClient(doerClient, PluginID, buildinfo.GetBuildInfo, client.authToken)
 	return client, nil
 }
 
 type SentryErrorResponse struct {
 	Detail string `json:"detail"`
+}
+
+func sourceError(source backend.ErrorSource, err error) error {
+	if source == backend.ErrorSourceDownstream {
+		return backend.DownstreamError(err)
+	}
+	return backend.PluginError(err)
+}
+
+func closeHttpResponseBody(res *http.Response) {
+	if err := res.Body.Close(); err != nil {
+		backend.Logger.Warn("Error closing http response", "error", err.Error())
+	}
 }
 
 func (sc *SentryClient) FetchWithPagination(path string, out interface{}) (string, error) {
@@ -50,7 +65,7 @@ func (sc *SentryClient) FetchWithPagination(path string, out interface{}) (strin
 	if err != nil {
 		return "", err
 	}
-	defer res.Body.Close()
+	defer closeHttpResponseBody(res)
 
 	nextURL := ""
 	header := res.Header
@@ -58,7 +73,14 @@ func (sc *SentryClient) FetchWithPagination(path string, out interface{}) (strin
 
 	if links != nil {
 		if nextLink, found := links["next"]; found && nextLink.Extra["results"] == "true" {
-			nextURL = nextLink.URI
+			nextURI, err := url.Parse(nextLink.URI)
+			if err != nil {
+				errorMessage := strings.TrimSpace(fmt.Sprintf("Error parsing next link URL: %s", err.Error()))
+				return "", backend.DownstreamError(errors.New(errorMessage))
+			}
+			nextURI.Host = ""
+			nextURI.Scheme = ""
+			nextURL = nextURI.String()
 		}
 	}
 
@@ -70,10 +92,10 @@ func (sc *SentryClient) FetchWithPagination(path string, out interface{}) (strin
 		var errResponse SentryErrorResponse
 		if err := json.NewDecoder(res.Body).Decode(&errResponse); err != nil {
 			errorMessage := strings.TrimSpace(fmt.Sprintf("%s %s", res.Status, err.Error()))
-			return "", errors.New(errorMessage)
+			return "", sourceError(backend.ErrorSourceFromHTTPStatus(res.StatusCode), errors.New(errorMessage))
 		}
 		errorMessage := strings.TrimSpace(fmt.Sprintf("%s %s", res.Status, errResponse.Detail))
-		return "", errors.New(errorMessage)
+		return "", sourceError(backend.ErrorSourceFromHTTPStatus(res.StatusCode), errors.New(errorMessage))
 	}
 	return nextURL, nil
 }
@@ -87,7 +109,8 @@ func (sc *SentryClient) Fetch(path string, out interface{}) error {
 	if err != nil {
 		return err
 	}
-	defer res.Body.Close()
+	defer closeHttpResponseBody(res)
+
 	if res.StatusCode == http.StatusOK {
 		if err := json.NewDecoder(res.Body).Decode(&out); err != nil {
 			return err
@@ -96,10 +119,10 @@ func (sc *SentryClient) Fetch(path string, out interface{}) error {
 		var errResponse SentryErrorResponse
 		if err := json.NewDecoder(res.Body).Decode(&errResponse); err != nil {
 			errorMessage := strings.TrimSpace(fmt.Sprintf("%s %s", res.Status, err.Error()))
-			return errors.New(errorMessage)
+			return sourceError(backend.ErrorSourceFromHTTPStatus(res.StatusCode), errors.New(errorMessage))
 		}
 		errorMessage := strings.TrimSpace(fmt.Sprintf("%s %s", res.Status, errResponse.Detail))
-		return errors.New(errorMessage)
+		return sourceError(backend.ErrorSourceFromHTTPStatus(res.StatusCode), errors.New(errorMessage))
 	}
 	return err
 }

@@ -32,6 +32,10 @@ export const Components = {
       label: 'Enable Secure Socks Proxy',
       tooltip: 'Enable proxying the datasource connection through the secure socks proxy to a different network.',
     },
+    TLSSkipVerify: {
+      label: 'Skip TLS Verify',
+      tooltip: 'Skip TLS certificate verification. Use this option for self-hosted Sentry instances with self-signed certificates.',
+    },
   },
   QueryEditor: {
     QueryType: {
@@ -69,6 +73,11 @@ export const Components = {
       },
     },
     Events: {
+      Fields: {
+        label: 'Fields',
+        tooltip: 'Sentry field names to fetch',
+        placeholder: 'Enter a Sentry field name',
+      },
       Query: {
         label: 'Query',
         tooltip: 'Sentry query to filter the results',
@@ -158,7 +167,8 @@ export const Components = {
       Interval: {
         label: 'Interval',
         tooltip: 'interval',
-        placeholder: 'Optional. Enter the interval to group the results (expected format `[number][unit]` where unit is `m` for minutes, `h` for hours, `d` for days, or `w` for weeks)',
+        placeholder:
+          'Optional. Enter the interval to group the results (format `[number][unit]`, for example `30m` or `2h`; Sentry accepts intervals between `1m` and `1d` that divide a day evenly). Also supports the $__interval variable. Values Sentry cannot accept are snapped to the nearest supported interval',
       },
       Category: {
         label: 'Category Filter',
@@ -186,6 +196,7 @@ export const Components = {
       label: 'Query Type',
       tooltip: 'Choose query type to get the relevant filters and results',
       id: 'data-testid variable-query-editor-query-type-select',
+      selectorTestId: 'data-testid query-type-dropdown',
     },
     Organization: {
       label: 'Organization',

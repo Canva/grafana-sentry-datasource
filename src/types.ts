@@ -1,4 +1,4 @@
-import type { DataSourceJsonData, DataQuery } from '@grafana/data';
+import type { DataQuery, DataSourceJsonData } from '@grafana/data';
 
 //#region Sentry Objects
 export type SentryOrganization = {
@@ -36,8 +36,18 @@ export type SentryTeam = {
   slug: string;
   status?: string;
 };
+export type SentryTag = {
+  key: string;
+  name: string;
+  totalValues: number;
+}
+export type SentryAttribute = {
+  key: string;
+  name: string;
+}
 export type SentryIssueSort = 'inbox' | 'new' | 'date' | 'priority' | 'freq' | 'user';
 export type SentryEventSort = 'last_seen()' | 'count()' | 'epm()' | 'failure_rate()' | 'level';
+export type SentrySortDirection = 'asc' | 'desc';
 //#endregion
 
 //#region Config
@@ -45,6 +55,7 @@ export interface SentryConfig extends DataSourceJsonData {
   url: string;
   orgSlug: string;
   enableSecureSocksProxy?: boolean;
+  tlsSkipVerify?: boolean;
 }
 export interface SentrySecureConfig {
   authToken: string;
@@ -52,7 +63,7 @@ export interface SentrySecureConfig {
 //#endregion
 
 //#region Query
-export type QueryType = 'issues' | 'events' | 'statsV2' | 'eventsStats' | 'metrics';
+export type QueryType = 'issues' | 'events' | 'statsV2' | 'eventsStats' | 'metrics' | 'spans' | 'spansStats';
 export type SentryQueryBase<T extends QueryType> = { queryType: T } & DataQuery;
 export type SentryIssuesQuery = {
   projectIds: string[];
@@ -65,9 +76,20 @@ export type SentryEventsQuery = {
   projectIds: string[];
   environments: string[];
   eventsQuery: string;
+  eventsFields?: string[];
   eventsSort?: SentryEventSort;
+  eventsSortDirection?: SentrySortDirection;
   eventsLimit?: number;
 } & SentryQueryBase<'events'>;
+export type SentrySpansQuery = {
+  projectIds: string[];
+  environments: string[];
+  eventsQuery: string;
+  eventsFields?: string[];
+  eventsSort?: SentryEventSort;
+  eventsSortDirection?: SentrySortDirection;
+  eventsLimit?: number;
+} & SentryQueryBase<'spans'>;
 export type SentryEventsStatsQuery = {
   projectIds: string[];
   environments: string[];
@@ -77,6 +99,15 @@ export type SentryEventsStatsQuery = {
   eventsStatsLimit?: number;
   eventsStatsGroups: string[];
 } & SentryQueryBase<'eventsStats'>;
+export type SentrySpansStatsQuery = {
+  projectIds: string[];
+  environments: string[];
+  eventsStatsYAxis: string[];
+  eventsStatsQuery: string;
+  eventsStatsSort?: string;
+  eventsStatsLimit?: number;
+  eventsStatsGroups: string[];
+} & SentryQueryBase<'spansStats'>;
 export type SentryMetricsQueryField =
   | 'session.anr_rate'
   | 'session.abnormal'
@@ -123,7 +154,9 @@ export type SentryStatsV2Query = {
 export type SentryQuery =
   | SentryIssuesQuery
   | SentryEventsQuery
+  | SentrySpansQuery
   | SentryEventsStatsQuery
+  | SentrySpansStatsQuery
   | SentryMetricsQuery
   | SentryStatsV2Query;
 //#endregion
