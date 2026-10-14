@@ -1,8 +1,14 @@
 # Changelog
 
+## 2.2.8
+
+- Dependency updates
+- Fix security vulnerabilities (CVE-2026-102276, CVE-2026-102278, CVE-2026-102990)
+
 ## 2.2.7
 
 - Dependency updates
+- Fix security vulnerabilities (CVE-2026-40181, CVE-2026-85730)
 
 ## 2.2.6
 
