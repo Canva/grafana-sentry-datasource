@@ -2,6 +2,7 @@ package handlers_test
 
 import (
 	"context"
+	"net/url"
 	"testing"
 	"time"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/data"
 	"github.com/grafana/sentry-datasource/pkg/framer"
 	"github.com/grafana/sentry-datasource/pkg/plugin"
+	"github.com/grafana/sentry-datasource/pkg/sentry"
 	"github.com/grafana/sentry-datasource/pkg/util"
 
 	"github.com/stretchr/testify/assert"
@@ -264,6 +266,57 @@ func TestSentryDatasource_Events(t *testing.T) {
 		require.Equal(t, "id", frame.Fields[0].Name)
 		require.Equal(t, "message", frame.Fields[1].Name)
 		require.Contains(t, frame.Meta.ExecutedQueryString, "release")
+	})
+
+	// Queries built outside the query editor (Scenes apps, dashboards saved before 2.0, API
+	// callers) omit eventsFields. The handler passes the empty list through unchanged and the
+	// fallback to sentry.DefaultEventFields happens in GetEventsInput.ToQuery().
+	t.Run("events query without eventsFields should request the default fields", func(t *testing.T) {
+		sc := util.NewFakeClient(util.FakeDoer{Body: `{"data": [{"id": "event_id_1", "title": "event_title_1"}]}`})
+
+		query := `{
+			"queryType" : "events",
+			"projectIds" : [],
+			"environments" : [],
+			"eventsQuery" : "",
+			"eventsLimit" : 10
+		}`
+
+		ds := plugin.NewDatasourceInstance(sc)
+		ctx := context.TODO()
+
+		res, _ := ds.QueryData(ctx, &backend.QueryDataRequest{Queries: []backend.DataQuery{{RefID: "A", JSON: []byte(query)}}})
+
+		assert.Nil(t, res.Responses["A"].Error)
+		require.Equal(t, 1, len(res.Responses["A"].Frames))
+		frame := res.Responses["A"].Frames[0]
+		assert.Equal(t, "Events (A)", frame.Name)
+
+		executed, err := url.Parse(frame.Meta.ExecutedQueryString)
+		require.NoError(t, err)
+		assert.Equal(t, sentry.DefaultEventFields, executed.Query()["field"])
+	})
+
+	t.Run("events query with explicit eventsFields should not append the default fields", func(t *testing.T) {
+		sc := util.NewFakeClient(util.FakeDoer{Body: `{"data": [{"title": "event_title_1", "timestamp": "2026-01-01T00:00:00Z"}]}`})
+
+		query := `{
+			"queryType" : "events",
+			"eventsFields" : ["title", "timestamp"],
+			"eventsLimit" : 10
+		}`
+
+		ds := plugin.NewDatasourceInstance(sc)
+		ctx := context.TODO()
+
+		res, _ := ds.QueryData(ctx, &backend.QueryDataRequest{Queries: []backend.DataQuery{{RefID: "A", JSON: []byte(query)}}})
+
+		assert.Nil(t, res.Responses["A"].Error)
+		require.Equal(t, 1, len(res.Responses["A"].Frames))
+
+		executed, err := url.Parse(res.Responses["A"].Frames[0].Meta.ExecutedQueryString)
+		require.NoError(t, err)
+		assert.Equal(t, []string{"title", "timestamp"}, executed.Query()["field"])
 	})
 
 	t.Run("valid events stats query should produce correct result", func(t *testing.T) {

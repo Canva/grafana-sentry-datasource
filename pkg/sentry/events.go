@@ -7,6 +7,15 @@ import (
 	"time"
 )
 
+// DefaultEventFields mirrors the pre-2.0 getRequiredFields() list and the defaults the
+// query editor pre-populates (EVENTS_DEFAULT_FIELDS in EventsEditor.tsx), so queries built
+// outside the editor (Scenes apps, dashboards saved before 2.0, API callers) keep working
+// instead of failing with "400 No columns selected".
+var DefaultEventFields = []string{
+	"id", "title", "project", "project.id", "release",
+	"count()", "epm()", "last_seen()", "level", "event.type", "platform",
+}
+
 type GetEventsInput struct {
 	OrganizationSlug string
 	ProjectIds       []string
@@ -32,7 +41,11 @@ func (gei *GetEventsInput) ToQuery() string {
 		params.Set("sort", gei.Sort)
 	}
 	params.Set("per_page", strconv.FormatInt(gei.Limit, 10))
-	for _, field := range gei.Fields {
+	fields := gei.Fields
+	if len(fields) == 0 {
+		fields = DefaultEventFields
+	}
+	for _, field := range fields {
 		params.Add("field", field)
 	}
 	for _, projectId := range gei.ProjectIds {

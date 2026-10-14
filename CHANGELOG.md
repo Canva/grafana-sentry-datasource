@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.9
+
+- Fall back to default event fields when a query specifies none (restores pre-2.0 behaviour for dashboards and API/Scenes callers)
+
 ## 2.2.8
 
 - Dependency updates
