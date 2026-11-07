@@ -29,11 +29,12 @@ type SentryProject struct {
 }
 
 func (sc *SentryClient) GetProjects(organizationSlug string, withPagination bool, bypassCache bool) ([]SentryProject, error) {
-	if !bypassCache {
-		cacheKey := projectCacheKey
-		if withPagination {
-			cacheKey += "-pagination"
-		}
+	cacheKey := projectCacheKey
+	if withPagination {
+		cacheKey += "-pagination"
+	}
+
+	if !bypassCache && sc.cache != nil {
 		cacheValue, found := sc.cache.Get(cacheKey)
 		if found {
 			projects, ok := cacheValue.([]SentryProject)
@@ -46,7 +47,7 @@ func (sc *SentryClient) GetProjects(organizationSlug string, withPagination bool
 	projects := []SentryProject{}
 	if organizationSlug == "" {
 		organizationSlug = sc.OrgSlug
-	}	
+	}
 
 	url := "/api/0/organizations/" + organizationSlug + "/projects/"
 
@@ -67,7 +68,9 @@ func (sc *SentryClient) GetProjects(organizationSlug string, withPagination bool
 			return nil, err
 		}
 	}
-	sc.cache.Set(projectCacheKey, projects, defaultCacheTTL)
+	if sc.cache != nil {
+		sc.cache.Set(cacheKey, projects, defaultCacheTTL)
+	}
 	return projects, nil
 }
 
