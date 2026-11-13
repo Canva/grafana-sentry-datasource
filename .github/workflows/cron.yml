@@ -9,7 +9,7 @@ permissions: {}
 
 jobs:
   playwright-cloud:
-    uses: grafana/data-sources-ci-workflows/.github/workflows/playwright-cloud.yml@main
+    uses: grafana/data-sources-ci-workflows/.github/workflows/playwright-cloud.yml@9a420bb406397ffef23fd07c3eea46bef441813c # main
     secrets: inherit
     with:
       bench-execute-cmd: DS_INSTANCE_UID=sentry-ds-m npm run e2e
