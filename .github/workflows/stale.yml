@@ -10,4 +10,4 @@ jobs:
     permissions:
       issues: write
       pull-requests: write
-    uses: grafana/data-sources-ci-workflows/.github/workflows/reusable-stale.yml@main # zizmor: ignore[unpinned-uses]
+    uses: grafana/data-sources-ci-workflows/.github/workflows/reusable-stale.yml@9a420bb406397ffef23fd07c3eea46bef441813c # main # zizmor: ignore[unpinned-uses]

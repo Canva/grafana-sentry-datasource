@@ -12,4 +12,4 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    uses: grafana/data-sources-ci-workflows/.github/workflows/reusable-add-to-project.yml@main # zizmor: ignore[unpinned-uses]
+    uses: grafana/data-sources-ci-workflows/.github/workflows/reusable-add-to-project.yml@9a420bb406397ffef23fd07c3eea46bef441813c # main # zizmor: ignore[unpinned-uses]
