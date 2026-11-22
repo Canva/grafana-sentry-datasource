@@ -11,7 +11,7 @@ permissions: {}
 jobs:
   ci:
     name: CI
-    uses: grafana/plugin-ci-workflows/.github/workflows/ci.yml@ci-cd-workflows/v11.3.0
+    uses: grafana/plugin-ci-workflows/.github/workflows/ci.yml@ef2d5f15ea47259e126ed6ea0b63ee3e4c0a73a5 # ci-cd-workflows/v11.3.0
     permissions:
       contents: read
       id-token: write
@@ -21,7 +21,7 @@ jobs:
       trufflehog-exclude-detectors: SentryToken
   publish-and-deploy:
     if: github.ref == 'refs/heads/main'
-    uses: grafana/data-sources-ci-workflows/.github/workflows/cd-dev.yml@main
+    uses: grafana/data-sources-ci-workflows/.github/workflows/cd-dev.yml@9a420bb406397ffef23fd07c3eea46bef441813c # main
     with:
       go-version: '1.27.0'
       golangci-lint-version: '2.14.0'
